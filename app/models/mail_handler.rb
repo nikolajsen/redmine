@@ -95,20 +95,30 @@ class MailHandler < ActionMailer::Base
         # ignoring it
       end
     elsif m = email.subject.match(ISSUE_REPLY_SUBJECT_RE)
+      # DEBUG
+      #print "Reply to issue #{m[1]}\n"
       receive_issue_reply(m[1].to_i)
     elsif m = email.subject.match(MESSAGE_REPLY_SUBJECT_RE)
       receive_message_reply(m[1].to_i)
     else
+      # DEBUG
+      #print "New issue - This is not a reply...\n"
       receive_issue
     end
   rescue ActiveRecord::RecordInvalid => e
     # TODO: send a email to the user
+    # DEBUG
+    #print "An error happened in the dispatcher: #{e.message}\n"
     logger.error e.message if logger
     false
   rescue MissingInformation => e
+    # DEBUG
+    #print "Missing information in the dispatcher: #{e.message}\n"
     logger.error "MailHandler: missing information from #{user}: #{e.message}" if logger
     false
   rescue UnauthorizedAction => e
+    # DEBUG
+    #print "Unauthorized action in the dispatcher: #{e.message}\n"
     logger.error "MailHandler: unauthorized attempt from #{user}" if logger
     false
   end

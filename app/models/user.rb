@@ -224,7 +224,9 @@ class User < Principal
   
   # Makes find_by_mail case-insensitive
   def self.find_by_mail(mail)
-    find(:first, :conditions => ["LOWER(mail) = ?", mail.to_s.downcase])
+    # 20090811 - nikolaj@nikolajsen.net - Added search for e-mail address in the mail_alias field too
+    find(:first, :conditions => ["LOWER(mail) = ? OR FIND_IN_SET(?,LOWER(mail_alias))", mail.to_s.downcase, mail.to_s.downcase])
+    #find(:first, :conditions => ["LOWER(mail) = ?", mail.to_s.downcase])
   end
   
   def to_s

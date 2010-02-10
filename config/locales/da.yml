@@ -195,6 +195,7 @@ da:
   field_firstname: Fornavn
   field_lastname: Efternavn
   field_mail: Email
+  field_mail_alias: Email alias(er)
   field_filename: Fil
   field_filesize: Størrelse
   field_downloads: Downloads

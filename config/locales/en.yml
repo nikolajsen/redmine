@@ -193,6 +193,7 @@ en:
   field_firstname: Firstname
   field_lastname: Lastname
   field_mail: Email
+  field_mail_alias: Email aliases
   field_filename: File
   field_filesize: Size
   field_downloads: Downloads

@@ -131,6 +131,8 @@ END_DESC
       options[:no_permission_check] = ENV['no_permission_check'] if ENV['no_permission_check']
 
       Redmine::IMAP.check(imap_options, options)
+
+      RAILS_DEFAULT_LOGGER.flush
     end
     
     desc <<-END_DESC
@@ -164,6 +166,8 @@ END_DESC
       options[:no_permission_check] = ENV['no_permission_check'] if ENV['no_permission_check']
       
       Redmine::POP3.check(pop_options, options)
+
+      RAILS_DEFAULT_LOGGER.flush
     end
   end
 end
