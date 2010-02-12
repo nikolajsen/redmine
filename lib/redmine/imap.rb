@@ -29,23 +29,28 @@ module Redmine
         imap = Net::IMAP.new(host, port, ssl)        
         imap.login(imap_options[:username], imap_options[:password]) unless imap_options[:username].nil?
         imap.select(folder)
+        # 20100212 - NMN - Initialize a mail counter
+        mail_counter = 0
         imap.search(['NOT', 'SEEN']).each do |message_id|
+          mail_counter += 1
           msg = imap.fetch(message_id,'RFC822')[0].attr['RFC822']
-          logger.debug "Receiving message #{message_id}" if logger && logger.debug?
+          logger.debug "Receiving message ##{mail_counter} (id: #{message_id})" if logger && logger.debug?
           if MailHandler.receive(msg, options)
-            logger.debug "Message #{message_id} successfully received" if logger && logger.debug?
+            logger.debug "Message ##{mail_counter} (id: #{message_id}) successfully received" if logger && logger.debug?
             if imap_options[:move_on_success]
               imap.copy(message_id, imap_options[:move_on_success])
             end
             imap.store(message_id, "+FLAGS", [:Seen, :Deleted])
           else
-            logger.debug "Message #{message_id} can not be processed" if logger && logger.debug?
+            logger.debug "Message ##{mail_counter} (id: #{message_id}) can not be processed" if logger && logger.debug?
             imap.store(message_id, "+FLAGS", [:Seen])
             if imap_options[:move_on_failure]
               imap.copy(message_id, imap_options[:move_on_failure])
               imap.store(message_id, "+FLAGS", [:Deleted])
             end
           end
+          # 20100212 - NMN - Limit e-mail receival to 1 mail at the time
+          break if mail_counter > 0
         end
         imap.expunge
       end
