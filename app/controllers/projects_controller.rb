@@ -303,9 +303,11 @@ class ProjectsController < ApplicationController
   def add_file
     if request.post?
       container = (params[:version_id].blank? ? @project : @project.versions.find_by_id(params[:version_id]))
-      attachments = attach_files(container, params[:attachments])
+      attachments = Attachment.attach_files(container, params[:attachments])
+      flash[:warning] = attachments[:flash] if attachments[:flash]
+
       if !attachments.empty? && Setting.notified_events.include?('file_added')
-        Mailer.deliver_attachments_added(attachments)
+        Mailer.deliver_attachments_added(attachments[:files])
       end
       redirect_to :controller => 'projects', :action => 'list_files', :id => @project
       return
@@ -356,13 +358,9 @@ class ProjectsController < ApplicationController
     @issues_by_version = {}
     unless @selected_tracker_ids.empty?
       @versions.each do |version|
-        conditions = {:tracker_id => @selected_tracker_ids}
-        if !@project.versions.include?(version)
-          conditions.merge!(:project_id => project_ids)
-        end
         issues = version.fixed_issues.visible.find(:all,
                                                    :include => [:project, :status, :tracker, :priority],
-                                                   :conditions => conditions,
+                                                   :conditions => {:tracker_id => @selected_tracker_ids, :project_id => project_ids},
                                                    :order => "#{Project.table_name}.lft, #{Tracker.table_name}.position, #{Issue.table_name}.id")
         @issues_by_version[version] = issues
       end
